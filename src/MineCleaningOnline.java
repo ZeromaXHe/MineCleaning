@@ -1,24 +1,48 @@
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import java.util.Scanner;
 
-public class MineCleaning {
+public class MineCleaningOnline {
 
     public static void main(String[] args) {
-        MapManager mm = new MapManager();
+        Scanner in = new Scanner(System.in);
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new OutputStreamWriter(System.out,"UTF-8"),true);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        MapManagerOnline mm = new MapManagerOnline(out,in);
         mm.startMenu();
     }
 
+    public void play(PrintWriter out, Scanner in){
+        MapManagerOnline mm = new MapManagerOnline(out,in);
+        mm.startMenu();
+    }
 }
 
-class MapManager {
+class MapManagerOnline {
+    private PrintWriter out;
+    private Scanner in;
+
+    MapManagerOnline(PrintWriter out, Scanner in){
+        this.out = out;
+        this.in = in;
+    }
+
     void startMenu() {
         drawStartMenu();
         anyInputGoToMainMenu();
     }
 
     private void anyInputGoToMainMenu() {
-        Scanner scanner = new Scanner(System.in);
-        if (scanner.hasNext()) mainMenu();
+        if (in.hasNextLine()) {
+            in.nextLine();
+            mainMenu();
+        }
     }
 
     private void mainMenu() {
@@ -27,21 +51,21 @@ class MapManager {
     }
 
     private void drawStartMenu() {
-        System.out.println("【扫雷游戏  v0.3】");
-        System.out.println(" 开发者：朱肖訸  ");
-        System.out.println("[任意输入开始游戏]");
+        out.println("【扫雷游戏  v0.4】");
+        out.println(" 开发者：朱肖訸  ");
+        out.println("[任意输入开始游戏]");
     }
 
     private void drawMainMenu() {
-        System.out.println("===============================================");
-        System.out.println("【主菜单】");
-        System.out.println("1、开始游戏  2、游戏设置  3、版本介绍  4、退出游戏");
+        for(int i=0;i<5;i++)out.println();
+        out.println("===============================================");
+        out.println("【主菜单】");
+        out.println("1、开始游戏  2、游戏设置  3、版本介绍  4、退出游戏");
     }
 
     private void mainMenuChoice() {
-        System.out.println("请输入你的选择:");
-        Scanner scanner = new Scanner(System.in);
-        String select = scanner.nextLine();
+        out.println("请输入你的选择:");
+        String select = in.nextLine();
         switch (select) {
             case "1":
                 gameStart();
@@ -53,7 +77,7 @@ class MapManager {
                 versionMenu();
                 break;
             case "4":
-                System.exit(0);
+                //TODO:System.exit(0);
                 break;
             default:
                 mainMenuChoice();
@@ -61,49 +85,49 @@ class MapManager {
     }
 
     private void gameStart() {
-        System.out.println("【开始游戏】");
-        System.out.println("本游戏版本目前支持初级难度（9*9，10雷）,中级难度（16*16，40雷），高级难度（16*30，99雷）和自定义模式");
-        System.out.println("请输入数字来选择模式：1、初级 2、中级 3、高级 4、自定义 其他输入将视为退回主菜单");
-        Scanner scanner = new Scanner(System.in);
-        int select = scanner.nextInt();
+        for(int i=0;i<5;i++)out.println();
+        out.println("【开始游戏】");
+        out.println("本游戏版本目前支持初级难度（9*9，10雷）,中级难度（16*16，40雷），高级难度（16*30，99雷）和自定义模式");
+        out.println("请输入数字来选择模式：1、初级 2、中级 3、高级 4、自定义 其他输入将视为退回主菜单");
+
+        String select = in.nextLine();
         gameInit(select);
     }
 
-    private void gameInit(int select) {
+    private void gameInit(String select) {
         int[] gameSettingInfo;//0存储行数，1存储列数，2存储地雷数
         switch (select) {
-            case 1:
-                System.out.println("你选择了初级难度...");
+            case "1":
+                out.println("你选择了初级难度...");
                 gameSettingInfo = new int[]{9, 9, 10};
                 break;
-            case 2:
-                System.out.println("你选择了中级难度...");
+            case "2":
+                out.println("你选择了中级难度...");
                 gameSettingInfo = new int[]{16, 16, 40};
                 break;
-            case 3:
-                System.out.println("你选择了高级难度...");
+            case "3":
+                out.println("你选择了高级难度...");
                 gameSettingInfo = new int[]{16, 30, 99};
                 break;
-            case 4:
-                System.out.println("你选择了自定义模式...");
-                System.out.println("请输入你想要的行、列数和地雷数量：");
-                System.out.println("（格式为：“9,9,9”,逗号为英文逗号，行数<=16，列数<=30,0<地雷数<=min(99,行*列-1））");
-                System.out.println("(如果输入非法，将使用初级难度开始游戏)");
+            case "4":
+                out.println("你选择了自定义模式...");
+                out.println("请输入你想要的行、列数和地雷数量：");
+                out.println("（格式为：“9,9,9”,逗号为英文逗号，行数<=16，列数<=30,0<地雷数<=min(99,行*列-1））");
+                out.println("(如果输入非法，将使用初级难度开始游戏)");
                 gameSettingInfo = costumizedMode();
                 break;
             default:
                 mainMenu();
                 return;
         }
-
-        Gaming game = new Gaming(gameSettingInfo[0], gameSettingInfo[1], gameSettingInfo[2]);
+        out.println("即将生成范围为："+gameSettingInfo[0]+"*"+gameSettingInfo[1]+"，地雷数量为："+gameSettingInfo[2]+"的游戏");//TODO:test, need to remove
+        GamingOnline game = new GamingOnline(gameSettingInfo[0], gameSettingInfo[1], gameSettingInfo[2], out, in);
         chooseDig(game);
     }
 
     private int[] costumizedMode() {
 
-        Scanner scanner = new Scanner(System.in);
-        String aInput = scanner.nextLine();
+        String aInput = in.nextLine();
         String[] info = aInput.split(",");
 
         if (info.length == 3) {
@@ -121,52 +145,54 @@ class MapManager {
 
     }
 
-    private void chooseDig(Gaming aGame) {
-        System.out.println("请选择要挖开的区块（书写格式，如：“1,2”，1代表第一行，2代表第二列）：");
-        System.out.println("（输入'0'就退出游戏）");
-        Scanner sc = new Scanner(System.in);
-        String input = sc.nextLine();
-        if (input.equals("0")) System.exit(0);
+    private void chooseDig(GamingOnline aGame) {
+        out.println("请选择要挖开的区块（书写格式，如：“1,2”，1代表第一行，2代表第二列）：");
+        out.println("（输入'0'就退出游戏）");
+
+        String input = in.nextLine();
+        if (input.equals("0")) return;//TODO:System.exit(0);
         else {
             if (aGame.correctInput(input)) {
-
-                if (!aGame.drawUserMineMapMask(input) && !aGame.isLoseFlag()) chooseDig(aGame);
+                for(int i=0;i<5;i++)out.println();
+                if (!aGame.drawUserMineMapMask(input) && !aGame.isLoseFlag())
+                    chooseDig(aGame);
                 else {
                     if (aGame.isLoseFlag()) {
-                        System.out.println("对不起，欢迎再来挑战！祝你下次成功！");
+                        out.println("对不起，欢迎再来挑战！祝你下次成功！");
                     } else {
-                        System.out.println("你赢了，牛逼啊~");
+                        out.println("你赢了，牛逼啊~");
                     }
-                    System.out.println("[任意输入返回主菜单]");
+                    out.println("[任意输入返回主菜单]");
                     anyInputGoToMainMenu();
                 }
             } else {
-                System.out.println("看清楚输入格式好吗？输入1~9的数字+英文半角逗号+1~9的数字，兄弟！");
+                out.println("看清楚输入格式好吗？输入1~9的数字+英文半角逗号+1~9的数字，兄弟！");
                 chooseDig(aGame);
             }
         }
     }
 
     private void optionMenu() {
-        System.out.println("【游戏设置】");
-        System.out.println("暂不支持本功能");
-        System.out.println("任意输入返回上一级菜单~");
+        out.println("【游戏设置】");
+        out.println("暂不支持本功能");
+        out.println("任意输入返回上一级菜单~");
         anyInputGoToMainMenu();
 
     }
 
     private void versionMenu() {
-        System.out.println("版本介绍：");
-        System.out.println("v0.1:制作了基本的界面——开始菜单、主菜单等，实现了雷图的生成和用户视野掩码的制作");
-        System.out.println("v0.2:制作了点中周围无地雷的地块时自动遍历周边地区的功能，实现了游戏失败、成功的判定，基本可以进行真正的游戏");
-        System.out.println("v0.3:现在支持选择难度和自定义难度啦~");
-        System.out.println("任意输入返回上一级菜单~");
+        out.println("版本介绍：");
+        out.println("v0.1:制作了基本的界面——开始菜单、主菜单等，实现了雷图的生成和用户视野掩码的制作");
+        out.println("v0.2:制作了点中周围无地雷的地块时自动遍历周边地区的功能，实现了游戏失败、成功的判定，基本可以进行真正的游戏");
+        out.println("v0.3:现在支持选择难度和自定义难度啦~");
+        out.println("v0.4:现在支持开服务器让别人telnet连接服务器玩啦~");
+        out.println("任意输入返回上一级菜单~");
         anyInputGoToMainMenu();
     }
 
 }
 
-class Gaming {
+class GamingOnline {
     private int col;
     private int row;
     private int[][] mineMap;
@@ -175,8 +201,10 @@ class Gaming {
     private boolean loseFlag;
     private int mineNum;
     private int remainingUndig;
+    private PrintWriter out;
+    private Scanner in;
 
-//    Gaming() {
+//    GamingOnline() {
 //        row = 9;
 //        col = 9;
 //        loseFlag = false;
@@ -187,22 +215,26 @@ class Gaming {
 //        remainingUndig = 81;
 //    }
 
-    Gaming(int row, int col, int mineNum) {
+    GamingOnline(int row, int col, int mineNum, PrintWriter outter, Scanner inner) {
+        this.out = outter;
+        this.in = inner;
         this.row = row;
         this.col = col;
         loseFlag = false;
-        initMineMap(row, col, mineNum);
         mineMapMask = new boolean[row + 2][col + 2];
-        setBoundary(row, col);
         this.mineNum = mineNum;
         remainingUndig = row * col;
+        setBoundary(row, col);
+        initMineMap(row, col, mineNum);
+
     }
 
     private void initMineMap(int row, int col, int mineNum) {
-        System.out.println("正在生成雷图……");
+        out.println("正在生成雷图……");
         mineGenerator(row, col, mineNum);
         numGenerator(row, col);
-        System.out.println("已生成雷图");
+        out.println("已生成雷图");
+        displayMineMap();
     }
 
     /**
@@ -283,12 +315,15 @@ class Gaming {
      */
     private boolean userMineMapMaskAfterDig(int aRow, int aCol) {
         if (mineMapMask[aRow][aCol]) {
-            System.out.println("你特么已经挖过[" + aRow + "，" + aCol + "]了！！！快重新选一个！");
+            out.println("你特么已经挖过[" + aRow + "，" + aCol + "]了！！！快重新选一个！");
         } else {
             if (mineMap[aRow][aCol] == 9) {
                 loseFlag = true;
                 dig(aRow, aCol);
-                System.out.println("你输了，[" + aRow + "，" + aCol + "]是地雷");
+                out.println("!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!");
+                out.println("你输了，[" + aRow + "，" + aCol + "]是地雷");
+                out.println("!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!");
+                out.println();
             } else {
                 dig(aRow, aCol);
             }
@@ -315,19 +350,20 @@ class Gaming {
     }
 
     private void displayMineMap() {
-        System.out.print("   ");
-        for(int j = 1; j<=col;j++)System.out.printf(" %2d ", j);
-        System.out.println();
+        out.print("   ");
+        for(int j = 1; j<=col;j++)
+            out.printf(" %2d ", j);
+        out.println();
         for (int i = 1; i <= row; i++) {
-            System.out.printf("%2d ",i);
+            out.printf("%2d ",i);
             for (int j = 1; j <= col; j++) {
                 if (!mineMapMask[i][j]) {
-                    System.out.print("[  ]");
+                    out.print("[  ]");
                 } else {
-                    System.out.printf("[% 2d]", mineMap[i][j]);
+                    out.printf("[% 2d]", mineMap[i][j]);
                 }
             }
-            System.out.println();
+            out.println();
         }
     }
 
@@ -337,7 +373,8 @@ class Gaming {
      * @param aInput 输入的字符串
      * @return true，当输入符合格式要求；false，当输入不符合要求
      */
-    boolean correctInput(String aInput) {
+
+    boolean correctInput(String aInput){
         String[] analyseInput = aInput.trim().split(",");
         int n1;
         int n2;
